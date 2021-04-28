@@ -1,4 +1,4 @@
-package de.red.logic.task;
+package de.red.logic.task.basic;
 
 public interface Task<I, O> {
 
@@ -11,6 +11,7 @@ public interface Task<I, O> {
   default TaskResult<O> resultSuccess(O output) {
     return result(output, true);
   }
+
   default TaskResult<O> result(O output, boolean succeeded) {
     return new TaskResult<O>() {
       @Override

@@ -1,4 +1,4 @@
-package de.red.logic.task.async.group;
+package de.red.logic.task.async.preconfigured;
 
 import de.red.logic.task.async.AsyncTask;
 
