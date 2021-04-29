@@ -1,4 +1,4 @@
-package de.red.logic.task.basic;
+package de.red.logic.task.preconfigured;
 
 import de.red.logic.task.basic.Task;
 

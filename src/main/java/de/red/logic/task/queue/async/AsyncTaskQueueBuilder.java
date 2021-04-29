@@ -1,10 +1,10 @@
-package de.red.logic.task;
+package de.red.logic.task.queue.async;
 
 import de.red.logic.task.async.AsyncTask;
-import de.red.logic.task.async.preconfigured.AsyncInputVoidTask;
-import de.red.logic.task.basic.AsyncTaskResult;
-import de.red.logic.task.scheduler.AsyncTaskQueue;
+import de.red.logic.task.async.AsyncTaskResult;
+import de.red.logic.task.queue.TaskQueue;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * accepts any form of async tasks
@@ -51,5 +51,9 @@ public interface AsyncTaskQueueBuilder<Builder> {
   public AsyncTaskQueueBuilder addAsyncFailTask(AsyncTask completionTask,
       String targetGroup, int targetID);
 
-  public AsyncTaskQueue build(int ID, String group);
+  public AsyncTaskQueueBuilder overrideDefaultExecutor(ExecutorService executorService);
+
+  public TaskQueue buildSync(int ID, String group);
+
+  public TaskQueue buildAsync();
 }

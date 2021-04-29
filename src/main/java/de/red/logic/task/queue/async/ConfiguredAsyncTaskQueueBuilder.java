@@ -1,10 +1,12 @@
-package de.red.logic.task.scheduler;
+package de.red.logic.task.queue.async;
 
-import de.red.logic.task.AsyncTaskQueueBuilder;
 import de.red.logic.task.adapter.PipeConsumer;
 import de.red.logic.task.async.AsyncTask;
-import de.red.logic.task.async.preconfigured.AsyncInputVoidTask;
-import de.red.logic.task.basic.AsyncTaskResult;
+import de.red.logic.task.async.AsyncTaskResult;
+import de.red.logic.task.queue.TaskQueue;
+import de.red.logic.task.scheduler.AsyncTaskInvoke;
+import de.red.logic.task.scheduler.RequireExecutor;
+import de.red.logic.task.scheduler.TaskInfoAccess;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,17 +14,12 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Predicate;
 
-public abstract class ConfiguredAsyncTaskQueueBuilder implements
+public class ConfiguredAsyncTaskQueueBuilder implements
     AsyncTaskQueueBuilder<ConfiguredAsyncTaskQueueBuilder>, RequireExecutor {
 
   private final ConfiguredAsyncTaskQueueBuilder instance = this;
 
-  private AsyncTaskQueue prototype = new AsyncTaskQueue() {
-    @Override
-    public ExecutorService requireExecutor() {
-      return instance.requireExecutor();
-    }
-  };
+  private ConfiguredAsyncTaskQueue prototype = new ConfiguredAsyncTaskQueue();
 
   @Override
   public ConfiguredAsyncTaskQueueBuilder addAsyncTask(AsyncTask asyncTask) {
@@ -32,13 +29,14 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
   }
 
   @Override
-  public ConfiguredAsyncTaskQueueBuilder addAsyncCompletionTask(AsyncTask<List<AsyncTaskResult>,?> completionTask,
+  public ConfiguredAsyncTaskQueueBuilder addAsyncCompletionTask(
+      AsyncTask<List<AsyncTaskResult>, ?> completionTask,
       String targetGroup) {
     new PipeConsumerBuilder(prototype)
         .appendTaskValidator(taskResult -> taskResult.getGroupName().equals(targetGroup))
         .appendLogic((taskResult, builder) -> {
           if (builder.completions >= builder.getGroupSize(targetGroup)) {
-            builder.executeTask("result",builder.results);
+            builder.executeTask("result", builder.results);
           }
         })
         .appendTask(completionTask, "result")
@@ -47,14 +45,15 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
   }
 
   @Override
-  public ConfiguredAsyncTaskQueueBuilder addAsyncSuccessAllTask(AsyncTask<List<AsyncTaskResult>,?> completionTask,
+  public ConfiguredAsyncTaskQueueBuilder addAsyncSuccessAllTask(
+      AsyncTask<List<AsyncTaskResult>, ?> completionTask,
       String targetGroup) {
     new PipeConsumerBuilder(prototype)
         .appendTaskValidator(taskResult -> taskResult.getGroupName().equals(targetGroup))
         .appendLogic((taskResult, builder) -> {
           if (builder.completions >= builder.getGroupSize(targetGroup)) {
             if (builder.results.stream().allMatch(res -> taskResult.succeded())) {
-              builder.executeTask("result",builder.results);
+              builder.executeTask("result", builder.results);
             }
           }
         })
@@ -65,14 +64,15 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
   }
 
   @Override
-  public ConfiguredAsyncTaskQueueBuilder addAsyncSuccessAnyTask(AsyncTask<List<AsyncTaskResult>,?> completionTask,
+  public ConfiguredAsyncTaskQueueBuilder addAsyncSuccessAnyTask(
+      AsyncTask<List<AsyncTaskResult>, ?> completionTask,
       String targetGroup) {
     new PipeConsumerBuilder(prototype)
         .appendTaskValidator(taskResult -> taskResult.getGroupName().equals(targetGroup))
         .appendLogic((taskResult, builder) -> {
           if (builder.completions >= builder.getGroupSize(targetGroup)) {
             if (builder.results.stream().anyMatch(res -> taskResult.succeded())) {
-              builder.executeTask("result",builder.results);
+              builder.executeTask("result", builder.results);
             }
           }
         })
@@ -82,14 +82,15 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
   }
 
   @Override
-  public ConfiguredAsyncTaskQueueBuilder addAsyncFailAnyTask(AsyncTask<List<AsyncTaskResult>,?> completionTask,
+  public ConfiguredAsyncTaskQueueBuilder addAsyncFailAnyTask(
+      AsyncTask<List<AsyncTaskResult>, ?> completionTask,
       String targetGroup) {
     new PipeConsumerBuilder(prototype)
         .appendTaskValidator(taskResult -> taskResult.getGroupName().equals(targetGroup))
         .appendLogic((taskResult, builder) -> {
           if (builder.completions >= builder.getGroupSize(targetGroup)) {
             if (builder.results.stream().anyMatch(res -> taskResult.failed())) {
-              builder.executeTask("result",builder.results);
+              builder.executeTask("result", builder.results);
             }
           }
         })
@@ -99,14 +100,15 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
   }
 
   @Override
-  public ConfiguredAsyncTaskQueueBuilder addAsyncFailAllTask(AsyncTask<List<AsyncTaskResult>,?> completionTask,
+  public ConfiguredAsyncTaskQueueBuilder addAsyncFailAllTask(
+      AsyncTask<List<AsyncTaskResult>, ?> completionTask,
       String targetGroup) {
     new PipeConsumerBuilder(prototype)
         .appendTaskValidator(taskResult -> taskResult.getGroupName().equals(targetGroup))
         .appendLogic((taskResult, builder) -> {
           if (builder.completions >= builder.getGroupSize(targetGroup)) {
             if (builder.results.stream().allMatch(res -> taskResult.failed())) {
-              builder.executeTask("result",builder.results);
+              builder.executeTask("result", builder.results);
             }
           }
         })
@@ -116,16 +118,17 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
   }
 
   @Override
-  public ConfiguredAsyncTaskQueueBuilder addAsyncAllCompletionTasks(AsyncTask<List<AsyncTaskResult>,?> success,
-      AsyncTask<List<AsyncTaskResult>,?> fail, String targetGroup) {
+  public ConfiguredAsyncTaskQueueBuilder addAsyncAllCompletionTasks(
+      AsyncTask<List<AsyncTaskResult>, ?> success,
+      AsyncTask<List<AsyncTaskResult>, ?> fail, String targetGroup) {
     new PipeConsumerBuilder(prototype)
         .appendTaskValidator(taskResult -> taskResult.getGroupName().equals(targetGroup))
         .appendLogic((taskResult, builder) -> {
           if (builder.completions >= builder.getGroupSize(targetGroup)) {
             if (builder.results.stream().allMatch(res -> taskResult.succeded())) {
-              builder.executeTask("success",builder.results);
+              builder.executeTask("success", builder.results);
             } else {
-              builder.executeTask("fail",builder.results);
+              builder.executeTask("fail", builder.results);
             }
           }
         })
@@ -142,7 +145,7 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
     new PipeConsumerBuilder(prototype)
         .appendTaskValidator(taskResult -> taskResult.getGroupName().equals(targetGroup)
             && taskResult.getTaskId() == targetID)
-        .appendLogic((taskResult, builder) -> builder.executeTask("completion",builder.results))
+        .appendLogic((taskResult, builder) -> builder.executeTask("completion", builder.results))
         .appendTask(completionTask, "completion")
         .build();
 
@@ -157,7 +160,7 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
             && taskResult.getTaskId() == targetID)
         .appendLogic((taskResult, builder) -> {
           if (taskResult.succeded()) {
-            builder.executeTask("completion",builder.results);
+            builder.executeTask("completion", builder.results);
           }
         })
         .appendTask(completionTask, "completion")
@@ -173,7 +176,7 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
             && taskResult.getTaskId() == targetID)
         .appendLogic((taskResult, builder) -> {
           if (taskResult.failed()) {
-            builder.executeTask("completion",builder.results.get(0));
+            builder.executeTask("completion", builder.results.get(0));
           }
         })
         .appendTask(completionTask, "completion")
@@ -182,16 +185,23 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
   }
 
   @Override
-  public ConfiguredAsyncTaskQueueBuilder addAsyncAnyCompletionTasks(AsyncTask<List<AsyncTaskResult>,?> success,
-      AsyncTask<List<AsyncTaskResult>,?> fail, String targetGroup) {
+  public AsyncTaskQueueBuilder overrideDefaultExecutor(ExecutorService executorService) {
+    prototype.executor = executorService;
+    return this;
+  }
+
+  @Override
+  public ConfiguredAsyncTaskQueueBuilder addAsyncAnyCompletionTasks(
+      AsyncTask<List<AsyncTaskResult>, ?> success,
+      AsyncTask<List<AsyncTaskResult>, ?> fail, String targetGroup) {
     new PipeConsumerBuilder(prototype)
         .appendTaskValidator(taskResult -> taskResult.getGroupName().equals(targetGroup))
         .appendLogic((taskResult, builder) -> {
           if (builder.completions >= builder.getGroupSize(targetGroup)) {
             if (builder.results.stream().anyMatch(res -> res.succeded())) {
-              builder.executeTask("success",builder.results);
+              builder.executeTask("success", builder.results);
             } else {
-              builder.executeTask("fail",builder.results);
+              builder.executeTask("fail", builder.results);
             }
           }
         })
@@ -203,25 +213,25 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
 
   @Override
   public ConfiguredAsyncTaskQueueBuilder addAsyncCompletionTask(
-      AsyncTask<List<AsyncTaskResult>,?> successTaskAny,
-      AsyncTask<List<AsyncTaskResult>,?> failTaskAny,
-      AsyncTask<List<AsyncTaskResult>,?> failTaskAll,
-      AsyncTask<List<AsyncTaskResult>,?> sucessTaskAll,
+      AsyncTask<List<AsyncTaskResult>, ?> successTaskAny,
+      AsyncTask<List<AsyncTaskResult>, ?> failTaskAny,
+      AsyncTask<List<AsyncTaskResult>, ?> failTaskAll,
+      AsyncTask<List<AsyncTaskResult>, ?> sucessTaskAll,
       String targetGroup) {
     new PipeConsumerBuilder(prototype)
         .appendTaskValidator(taskResult -> taskResult.getGroupName().equals(targetGroup))
         .appendLogic((taskResult, builder) -> {
           if (builder.completions >= builder.getGroupSize(targetGroup)) {
             if (builder.results.stream().anyMatch(res -> res.succeded())) {
-              builder.executeTask("success_any",builder.results);
+              builder.executeTask("success_any", builder.results);
             } else {
-              builder.executeTask("fail_any",builder.results);
+              builder.executeTask("fail_any", builder.results);
             }
 
             if (builder.results.stream().allMatch(res -> res.succeded())) {
-              builder.executeTask("success_all",builder.results);
+              builder.executeTask("success_all", builder.results);
             } else {
-              builder.executeTask("fail_all",builder.results);
+              builder.executeTask("fail_all", builder.results);
             }
           }
 
@@ -235,17 +245,21 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
   }
 
   @Override
-  /**
-   * completion task must be set
-   */
-  public AsyncTaskQueue build(int ID, String group) {
+  @SuppressWarnings(value = "Deadlock freedom")
+  public ConfiguredAsyncTaskQueue buildSync(int ID, String group) {
+    buildAsync();
+    prototype.finalGroup = Optional.of(group);
+    prototype.finalID = Optional.of(ID);
+
+    return prototype;
+  }
+
+  @Override
+  public TaskQueue buildAsync() {
     prototype.allTasks.forEach(task -> {
       prototype.groupSize.putIfAbsent(task.getGroupName(), 0);
       prototype.groupSize.compute(task.getGroupName(), (name, integer) -> integer++);
     });
-    prototype.finalGroup = group;
-    prototype.finalID = ID;
-
     return prototype;
   }
 
@@ -253,9 +267,14 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
     prototype.allTasks.add(task);
   }
 
+  @Override
+  public ExecutorService requireExecutor() {
+    return null;
+  }
+
   protected static class PipeConsumerBuilder extends PipeConsumer {
 
-    protected AsyncTaskQueue prototype;
+    protected ConfiguredAsyncTaskQueue prototype;
     protected Optional<String> group = Optional.empty();
     protected Optional<Integer> targetID = Optional.empty();
     protected HashMap<String, AsyncTask> tasks = new HashMap<>();
@@ -269,7 +288,7 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
 
     protected List<AsyncTaskResult> results = new ArrayList<>();
 
-    public PipeConsumerBuilder(AsyncTaskQueue prototype) {
+    public PipeConsumerBuilder(ConfiguredAsyncTaskQueue prototype) {
       this.prototype = prototype;
     }
 
@@ -342,6 +361,11 @@ public abstract class ConfiguredAsyncTaskQueueBuilder implements
       return requireTaskInfoAccess().getGroupSizes().get(group);
     }
 
+  }
+
+  protected interface AsyncTaskResultRunnable {
+
+    public void run(AsyncTaskResult taskResult, PipeConsumerBuilder builder);
   }
 
 }

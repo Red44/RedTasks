@@ -1,9 +1,6 @@
 package de.red.logic.task.adapter;
 
-import de.red.logic.task.async.AsyncTask;
-import de.red.logic.task.basic.AsyncTaskResult;
-import de.red.logic.task.basic.Task;
-import de.red.logic.task.basic.TaskResult;
+import de.red.logic.task.async.AsyncTaskResult;
 import java.util.ArrayList;
 import java.util.List;
 
