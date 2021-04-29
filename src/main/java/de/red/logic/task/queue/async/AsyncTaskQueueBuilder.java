@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
- * accepts any form of async tasks
+ * Warning : Deadlock freedom
  **/
 public interface AsyncTaskQueueBuilder {
 
