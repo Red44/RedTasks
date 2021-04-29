@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * accepts any form of async tasks
  **/
-public interface AsyncTaskQueueBuilder<Builder> {
+public interface AsyncTaskQueueBuilder {
 
   public AsyncTaskQueueBuilder addAsyncTask(AsyncTask asyncTask);
 

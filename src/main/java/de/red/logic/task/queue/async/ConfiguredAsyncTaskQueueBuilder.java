@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Predicate;
 
 public class ConfiguredAsyncTaskQueueBuilder implements
-    AsyncTaskQueueBuilder<ConfiguredAsyncTaskQueueBuilder>, RequireExecutor {
+    AsyncTaskQueueBuilder, RequireExecutor {
 
   private final ConfiguredAsyncTaskQueueBuilder instance = this;
 
