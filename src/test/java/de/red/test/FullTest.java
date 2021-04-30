@@ -52,7 +52,7 @@ public class FullTest {
       ).buildSync(1, "test").startQueue().getOutput(), "true");
     }
 
-    for (int i = 0; i < 5000; i++) {
+    for (int i = 0; i < 5; i++) {
       RedTasks.newAsyncTaskQueueBuilder().addAsyncTask(AsyncWrapper.wrap(
           new Task() {
             @Override
