@@ -9,62 +9,65 @@ public class ConfiguredSyncTaskQueueBuilder implements SyncTaskQueueBuilder {
 
   private TaskLinker linker = null;
 
+  private TaskLinker pointer;
+
   @Override
   public SyncTaskQueueBuilder setStartTask(Task task) {
     this.linker = new TaskLinker(task);
+    this.pointer = linker;
     return this;
   }
 
   @Override
   public SyncTaskQueueBuilder addCompletionTask(Task task) {
     checkTaskLinkerInstance();
-    linker.appendCompleteTask(task);
+    pointer.appendCompleteTask(task);
     return this;
   }
 
   @Override
   public SyncTaskQueueBuilder addFailTask(Task task) {
     checkTaskLinkerInstance();
-    linker.appendFailTask(task);
+    pointer.appendFailTask(task);
     return this;
   }
 
   @Override
   public SyncTaskQueueBuilder addSuccessTask(Task task) {
     checkTaskLinkerInstance();
-    linker.appendSuccessTask(task);
+    pointer.appendSuccessTask(task);
     return this;
   }
 
   @Override
   public SyncTaskQueueBuilder addCompletionTasks(Task successTask, Task failTask) {
     checkTaskLinkerInstance();
-    linker.appendSuccessTask(successTask);
-    linker.appendFailTask(failTask);
+    pointer.appendSuccessTask(successTask);
+    pointer.appendFailTask(failTask);
     return this;
   }
 
   @Override
   public SyncTaskQueueBuilder gotoCompletion() {
-    linker.gotoCompletion();
+    this.pointer = pointer.gotoCompletion();
     return this;
   }
 
   @Override
   public SyncTaskQueueBuilder gotoSuccess() {
-    linker.gotoSuccess();
+    this.pointer = pointer.gotoSuccess();
     return this;
   }
 
   @Override
   public SyncTaskQueueBuilder gotoFail() {
-    linker.gotoFail();
+    this.pointer = pointer.gotoFail();
     return this;
   }
 
   @Override
   public SyncTaskQueueBuilder goBack() {
-    linker.goBack();
+    pointer.goBack();
     return this;
   }
 

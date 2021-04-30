@@ -7,6 +7,9 @@ public interface Task<I, O> {
   default TaskResult<O> resultFailed() {
     return result(null, false);
   }
+  default TaskResult<O> resultFailed(O result) {
+    return result(result, false);
+  }
 
   default TaskResult<O> resultSuccess(O output) {
     return result(output, true);

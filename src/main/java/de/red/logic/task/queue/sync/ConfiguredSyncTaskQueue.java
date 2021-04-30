@@ -31,22 +31,24 @@ public class ConfiguredSyncTaskQueue implements TaskQueue {
     if (result.succeded()) {
       if (link.gotoSuccess() == link) {
         return result;
+      } else {
+        return traceDown(link.gotoSuccess(), result.getOutput());
       }
-      traceDown(link.gotoSuccess(), result.getOutput());
+
     } else {
       if (link.gotoFail() == link) {
         return result;
+      } else {
+        return traceDown(link.gotoFail(), result.getOutput());
       }
-      traceDown(link.gotoFail(), result.getOutput());
+
     }
-    // unreachable statement lol
-    return null;
   }
 
 
   public static class TaskLinker {
 
-    private Task baseTask;
+    private final Task baseTask;
 
     private Optional<TaskLinker> success = Optional.empty();
     private Optional<TaskLinker> fail = Optional.empty();
