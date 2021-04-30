@@ -38,7 +38,6 @@ public class ConfiguredAsyncTaskQueue implements Task,
 
   @Override
   public TaskResult<Object> operate(Object input) {
-    instantExecutions.forEach(tasks -> executeTask(tasks, input));
     if(finalGroup.isPresent() && finalID.isPresent()) {
       try {
         return executor.submit(() -> {
@@ -65,6 +64,7 @@ public class ConfiguredAsyncTaskQueue implements Task,
             }
 
           });
+          instantExecutions.forEach(tasks -> executeTask(tasks, input));
           current.suspend();
           return result.get();
         }).get();
@@ -84,6 +84,7 @@ public class ConfiguredAsyncTaskQueue implements Task,
       };
 
     }else {
+      instantExecutions.forEach(tasks -> executeTask(tasks, input));
       return new TaskResult<Object>() {
         @Override
         public boolean succeded() {
