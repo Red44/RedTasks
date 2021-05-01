@@ -48,6 +48,27 @@ public class ConfiguredSyncTaskQueueBuilder implements SyncTaskQueueBuilder {
   }
 
   @Override
+  public SyncTaskQueueBuilder addCompletionTaskAndGoto(Task task) throws StartTaskMustBeSet {
+    addCompletionTask(task);
+    gotoCompletion();
+    return this;
+  }
+
+  @Override
+  public SyncTaskQueueBuilder addFailTaskAndGoto(Task task) throws StartTaskMustBeSet {
+    addFailTask(task);
+    gotoFail();
+    return this;
+  }
+
+  @Override
+  public SyncTaskQueueBuilder addSuccessTaskAndGoto(Task task) throws StartTaskMustBeSet {
+    addSuccessTask(task);
+    gotoSuccess();
+    return this;
+  }
+
+  @Override
   public SyncTaskQueueBuilder gotoCompletion() {
     this.pointer = pointer.gotoCompletion();
     return this;
@@ -77,8 +98,9 @@ public class ConfiguredSyncTaskQueueBuilder implements SyncTaskQueueBuilder {
     return new ConfiguredSyncTaskQueue(linker);
   }
 
-  private void checkTaskLinkerInstance() throws StartTaskMustBeSet{
-    if(linker == null)
+  private void checkTaskLinkerInstance() throws StartTaskMustBeSet {
+    if (linker == null) {
       throw new StartTaskMustBeSet();
+    }
   }
 }

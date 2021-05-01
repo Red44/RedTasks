@@ -11,14 +11,22 @@ public interface SyncTaskQueueBuilder {
  */
   public SyncTaskQueueBuilder setStartTask(Task task);
 
+
   public SyncTaskQueueBuilder addCompletionTask(Task task) throws StartTaskMustBeSet;
 
   public SyncTaskQueueBuilder addFailTask(Task task) throws StartTaskMustBeSet;
 
   public SyncTaskQueueBuilder addSuccessTask(Task task) throws StartTaskMustBeSet;
 
-  public SyncTaskQueueBuilder addCompletionTasks(Task successTask, Task failTask)
-      throws StartTaskMustBeSet;
+  public SyncTaskQueueBuilder addCompletionTasks(Task successTask, Task failTask) throws StartTaskMustBeSet;
+
+
+  public SyncTaskQueueBuilder addCompletionTaskAndGoto(Task task) throws StartTaskMustBeSet;
+
+  public SyncTaskQueueBuilder addFailTaskAndGoto(Task task) throws StartTaskMustBeSet;
+
+  public SyncTaskQueueBuilder addSuccessTaskAndGoto(Task task) throws StartTaskMustBeSet;
+
 
   public SyncTaskQueueBuilder gotoCompletion() throws StartTaskMustBeSet;
 
