@@ -39,7 +39,6 @@ public class FullTest {
       }).build().startQueue().getOutput(), ran1 + ran2 + ran3);
     }
     System.out.println("\n");
-
     SimpleAssertSet async = new SimpleAssertSet("AsyncTask Queue Test ");
     for (int i = 0; i < 5; i++) {
       async.assertEquals(RedTasks.newAsyncTaskQueueBuilder().addAsyncTask(AsyncWrapper.wrap(
