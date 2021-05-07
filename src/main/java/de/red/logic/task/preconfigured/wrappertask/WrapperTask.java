@@ -4,6 +4,6 @@ import de.red.logic.task.async.AsyncTaskResult;
 import de.red.logic.task.basic.Task;
 import java.util.List;
 
-public interface OutputVoidWrapperTask extends Task<List<AsyncTaskResult<?>>,Void> {
+public interface WrapperTask<O> extends Task<List<AsyncTaskResult<?>>,O> {
 
 }

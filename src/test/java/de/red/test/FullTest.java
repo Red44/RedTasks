@@ -5,6 +5,7 @@ import de.red.logic.task.async.AsyncTaskResult;
 import de.red.logic.task.async.AsyncWrapper;
 import de.red.logic.task.basic.Task;
 import de.red.logic.task.basic.TaskResult;
+import de.red.logic.task.preconfigured.wrappertask.InputVoidWrapperTask;
 import java.util.List;
 import java.util.Random;
 
@@ -70,6 +71,6 @@ public class FullTest {
           .buildAsync().startQueue();
 
     }
-  }
 
+  }
 }
