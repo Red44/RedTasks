@@ -256,7 +256,7 @@ public class ConfiguredAsyncTaskQueueBuilder implements
   public TaskQueue buildAsync() {
     queueStructure.allTasks.forEach(task -> {
       queueStructure.groupSize.putIfAbsent(task.getGroupName(), 0);
-      queueStructure.groupSize.compute(task.getGroupName(), (name, integer) -> integer++);
+      queueStructure.groupSize.compute(task.getGroupName(), (name, integer) -> ++integer);
     });
     return queueStructure;
   }
