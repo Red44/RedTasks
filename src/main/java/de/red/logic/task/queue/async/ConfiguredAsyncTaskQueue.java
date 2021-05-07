@@ -101,7 +101,7 @@ public class ConfiguredAsyncTaskQueue implements Task,
 
   @Override
   public void executeTask(AsyncTask task, Object input) {
-    executor.submit(()->
+    executor.execute(()->
         asyncTaskPipe.pipe(
             (AsyncTaskResult) task.operate(input)
         )
